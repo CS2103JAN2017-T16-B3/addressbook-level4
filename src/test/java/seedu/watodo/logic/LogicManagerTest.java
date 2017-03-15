@@ -34,7 +34,7 @@ import seedu.watodo.logic.commands.DeleteCommand;
 import seedu.watodo.logic.commands.ExitCommand;
 import seedu.watodo.logic.commands.FindCommand;
 import seedu.watodo.logic.commands.HelpCommand;
-import seedu.watodo.logic.commands.ListCommand;
+import seedu.watodo.logic.commands.ListAllCommand;
 import seedu.watodo.logic.commands.SelectCommand;
 import seedu.watodo.logic.commands.exceptions.CommandException;
 import seedu.watodo.model.Model;
@@ -91,7 +91,7 @@ public class LogicManagerTest {
         logic = new LogicManager(model, new StorageManager(tempAddressBookFile, tempPreferencesFile));
         EventsCenter.getInstance().registerHandler(this);
 
-        latestSavedTaskManager = new TaskList(model.getAddressBook()); // last saved assumed to be up to date
+        latestSavedTaskManager = new TaskList(model.getWatodo()); // last saved assumed to be up to date
         helpShown = false;
         targetedJumpIndex = -1; // non yet
     }
@@ -124,7 +124,7 @@ public class LogicManagerTest {
      * @see #assertCommandBehavior(boolean, String, String, ReadOnlyTaskList, List)
      */
     private void assertCommandFailure(String inputCommand, String expectedMessage) {
-        TaskList expectedTaskManager = new TaskList(model.getAddressBook());
+        TaskList expectedTaskManager = new TaskList(model.getWatodo());
         List<ReadOnlyFloatingTask> expectedShownList = new ArrayList<>(model.getFilteredTaskList());
         assertCommandBehavior(true, inputCommand, expectedMessage, expectedTaskManager, expectedShownList);
     }
@@ -154,7 +154,7 @@ public class LogicManagerTest {
         assertEquals(expectedShownList, model.getFilteredTaskList());
 
         //Confirm the state of data (saved and in-memory) is as expected
-        assertEquals(expectedTaskManager, model.getAddressBook());
+        assertEquals(expectedTaskManager, model.getWatodo());
         assertEquals(expectedTaskManager, latestSavedTaskManager);
     }
 
@@ -251,7 +251,7 @@ public class LogicManagerTest {
         helper.addToModel(model, 2);
 
         assertCommandSuccess("list",
-                ListCommand.MESSAGE_SUCCESS,
+                ListAllCommand.MESSAGE_SUCCESS,
                 expectedAB,
                 expectedList);
     }
@@ -337,7 +337,7 @@ public class LogicManagerTest {
         List<FloatingTask> threeTasks = helper.generateTaskList(3);
 
         TaskList expectedAB = helper.generateTaskManager(threeTasks);
-        expectedAB.removePerson(threeTasks.get(1));
+        expectedAB.removeTask(threeTasks.get(1));
         helper.addToModel(model, threeTasks);
 
         assertCommandSuccess("delete 2",
@@ -448,7 +448,7 @@ public class LogicManagerTest {
             cmd.append("add ");
 
             cmd.append(p.getDescription().toString());
-            
+
             UniqueTagList tags = p.getTags();
             for (Tag t: tags) {
                 cmd.append(" t/").append(t.tagName);
